@@ -130,22 +130,29 @@ function render()
 function renderMenu(ticks)
 {
     var pxSize = 5;
-    var dist = ticks % can.width * 2 - can.width / 2;
+    var dist = ticks % can.width * 4 - can.width / 2;
     for (var y = 0; y < can.height; y += pxSize)
         for (var x = 0; x < can.width; x += pxSize)
         {
-            ctx.fillStyle = "rgb(" + (255 * (x / can.width)) + ", 0," + (255 - 255 * (y / can.height)) + ")";
             if (x / 3 + y >= dist && (x - 200) / 3 + (y - 200) <= dist)
             {
                 ctx.fillStyle = "rgb(" + Math.floor(255 * ((x + (x + y / 2) % 50) / can.width)) + ", 0," + Math.floor(255 - 255 * ((y + (x + y / 2) % 50) / can.height)) + ")";
                 if (255 * (x / can.width) == 255 * ((x + (x + y / 2) % 50) / can.width) && (x - 200) / 3 + (y - 200) - 8 <= dist && (x - 200) / 3 + (y - 200) + 8 >= dist)
-                    ctx.fillStyle = "#000";
+                {
+                    ctx.fillRect(x, y, pxSize, pxSize);  
+                    ctx.fillStyle = "#0004";
+                    ctx.fillRect(x, y, pxSize, pxSize);
+                }
+                else
+                {
+                    ctx.fillRect(x, y, pxSize, pxSize);
+                }
             }
             else
             {
                 ctx.fillStyle = "rgb(" + (255 * (x / can.width)) + ", 0," + (255 - 255 * (y / can.height)) + ")";
+                ctx.fillRect(x, y, pxSize, pxSize);
             }
-            ctx.fillRect(x, y, pxSize, pxSize);
         }
     ctx.fillStyle = "#fff2";
     ctx.fillRect(can.width / 2 - can.width / 4, can.height / 2 - can.height / 16, can.width / 2, can.height / 8);
