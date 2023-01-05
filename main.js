@@ -21,6 +21,22 @@ class Character
         this.team = team;
         this.type = type;
         this.dead = false;
+
+        switch (type)
+        {
+        case 0:
+            this.moveDist = 4;
+            this.health = 2;
+            break;
+        case 1:
+            this.moveDist = 3;
+            this.health = 2;
+            break;
+        case 2:
+            this.moveDist = 3;
+            this.health = 3;
+            break;
+        }
     }
 }
 
@@ -44,6 +60,9 @@ function start(map)
     tileSize = Math.floor(Math.min(window.innerWidth * 0.95, window.innerHeight * 0.95) / tileNum);
     can.width = tileNum * tileSize;
     can.height = can.width;
+    turns = 0;
+    select = -1;
+    document.querySelector("body").style.backgroundColor = "#f88";
 }
 
 function input(posx, posy)
@@ -71,7 +90,7 @@ function move(posx, posy)
     if (select == -1)
     {
         for (var i = 0; i < characters.length; i++)
-            if (characters[i].x == x && characters[i].y == y)
+            if (characters[i].x == x && characters[i].y == y && characters[i].team == turns % 2)
                 select = i;
     }
     else
@@ -90,6 +109,7 @@ function move(posx, posy)
             characters[select].y = y;
             select = -1;
             turns++;
+            document.querySelector("body").style.backgroundColor = "#" + (turns % 2 ? "88f" : "f88");
         }
     }
 }
@@ -113,9 +133,19 @@ function render()
         {
             ctx.fillStyle = "#ff8";
             ctx.fillRect(characters[select].x * tileSize, characters[select].y * tileSize, tileSize, tileSize);
+            for (var i = 0; i < characters.length; i++)
+                if (characters[i].team != characters[select].team)
+                {
+                    raytrace(characters[i].x + 0.5, characters[i].y + 0.5, characters[select].x + 0.5, characters[select].y + 0.5);
+                }
         }
         for (var i = 0; i < characters.length; i++)
         {
+            if (characters[i].team == turns % 2)
+            {
+                ctx.fillStyle = "#fff4";
+                ctx.fillRect(characters[i].x * tileSize, characters[i].y * tileSize, tileSize, tileSize);
+            }
             ctx.fillStyle = "#" + (characters[i].team ? "00f" : "f00");
             ctx.fillRect(characters[i].x * tileSize + tileSize * 0.1, characters[i].y * tileSize + tileSize *  0.1, tileSize * 0.8, tileSize * 0.8);
         }
@@ -162,7 +192,78 @@ function renderMenu(ticks)
     ctx.strokeRect(can.width / 2 - can.width / 4, can.height / 2 - can.height / 16, can.width / 2, can.height / 8);
 }
 
-function turn()
+function raytrace(x0, y0, x1, y1)
 {
+    var dx = Math.abs(x1 - x0);
+    var dy = Math.abs(y1 - y0);
+    var x = Math.floor(x0);
+    var y = Math.floor(y0);
+    var n = 1;
+    var xInc;
+    var yInc;
+    var error;
+    var ok = true;
 
+    if (dx == 0)
+    {
+        xInc = 0;
+        error = Infinity;
+    }
+    else if (x1 > x0)
+    {
+        xInc = 1;
+        n += Math.floor(x1) - x;
+        error = (Math.floor(x0) + 1 - x0) * dy;
+    }
+    else
+    {
+        xInc = -1;
+        n += x - Math.floor(x1);
+        error = (x0 - Math.floor(x0)) * dy;
+    }
+
+    if (dy == 0)
+    {
+        yInc = 0;
+        error -= Infinity;
+    }
+    else if (y1 > y0)
+    {
+        yInc = 1;
+        n += Math.floor(y1) - y;
+        error -= (Math.floor(y0) + 1 - y0) * dx;
+    }
+    else
+    {
+        yInc = -1;
+        n += y - Math.floor(y1);
+        error -= (y0 - Math.floor(y0)) * dx;
+    }
+
+    for (; n > 0; n--)
+    {
+        if (maps[activeMap][y][x])
+            ok = false;
+
+        if (error > 0)
+        {
+            y += yInc;
+            error -= dx;
+        }
+        else
+        {
+            x += xInc;
+            error += dy;
+        }
+    }
+
+    if (ok)
+    {
+        ctx.strokeStyle = "#ff8";
+        ctx.lineWidth = tileSize / 10;
+        ctx.beginPath();
+        ctx.moveTo(x0 * tileSize, y0 * tileSize);
+        ctx.lineTo(x1 * tileSize, y1 * tileSize);
+        ctx.stroke();
+    }
 }
