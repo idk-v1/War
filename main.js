@@ -118,34 +118,47 @@ function render()
 {
     if (activeMap != -1)
     {
+        // DRAW TILES
         for (var y = 0; y < tileNum; y++)
             for (var x = 0; x < tileNum; x++)
             {
+                // DRAW WALLS
                 if (maps[activeMap][y + 1][x])
                 {
                     ctx.fillStyle = "#2224";
                     ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
                 }
+
+                // DRAW CHECKERBOARD PATTERN
                 ctx.fillStyle = "#" + ((x + y * tileNum) % 2 ? "8884" : "90909044");
                 ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
             }
+
+        // IF SELECTION
         if (select != -1)
         {
+            // DRAW SELECT OUTLINE
             ctx.fillStyle = "#ff8";
             ctx.fillRect(characters[select].x * tileSize, characters[select].y * tileSize, tileSize, tileSize);
+
+            // DRAW RAYS
             for (var i = 0; i < characters.length; i++)
                 if (characters[i].team != characters[select].team)
                 {
-                    raytrace(characters[i].x + 0.5, characters[i].y + 0.5, characters[select].x + 0.5, characters[select].y + 0.5);
+                    raytrace(characters[select].x + 0.5, characters[select].y + 0.5, characters[i].x + 0.5, characters[i].y + 0.5);
                 }
         }
+
         for (var i = 0; i < characters.length; i++)
         {
+            // DRAW TEAM OUTLINE
             if (characters[i].team == turns % 2)
             {
                 ctx.fillStyle = "#fff4";
                 ctx.fillRect(characters[i].x * tileSize, characters[i].y * tileSize, tileSize, tileSize);
             }
+
+            // DRAW CHARACTERS
             ctx.fillStyle = "#" + (characters[i].team ? "00f" : "f00");
             ctx.fillRect(characters[i].x * tileSize + tileSize * 0.1, characters[i].y * tileSize + tileSize *  0.1, tileSize * 0.8, tileSize * 0.8);
         }
@@ -196,63 +209,65 @@ function raytrace(x0, y0, x1, y1)
 {
     var dx = Math.abs(x1 - x0);
     var dy = Math.abs(y1 - y0);
+
     var x = Math.floor(x0);
     var y = Math.floor(y0);
+
     var n = 1;
-    var xInc;
-    var yInc;
+    var x_inc, y_inc;
     var error;
+
     var ok = true;
 
     if (dx == 0)
     {
-        xInc = 0;
+        x_inc = 0;
         error = Infinity;
     }
     else if (x1 > x0)
     {
-        xInc = 1;
+        x_inc = 1;
         n += Math.floor(x1) - x;
         error = (Math.floor(x0) + 1 - x0) * dy;
     }
     else
     {
-        xInc = -1;
+        x_inc = -1;
         n += x - Math.floor(x1);
         error = (x0 - Math.floor(x0)) * dy;
     }
 
     if (dy == 0)
     {
-        yInc = 0;
+        y_inc = 0;
         error -= Infinity;
     }
     else if (y1 > y0)
     {
-        yInc = 1;
+        y_inc = 1;
         n += Math.floor(y1) - y;
         error -= (Math.floor(y0) + 1 - y0) * dx;
     }
     else
     {
-        yInc = -1;
+        y_inc = -1;
         n += y - Math.floor(y1);
         error -= (y0 - Math.floor(y0)) * dx;
     }
 
-    for (; n > 0; n--)
+    for (; n > 0; --n)
     {
-        if (maps[activeMap][y][x])
+        if (maps[activeMap][y + 1][x])
             ok = false;
 
         if (error > 0)
         {
-            y += yInc;
+            y += y_inc;
             error -= dx;
         }
         else
         {
-            x += xInc;
+            x += x_inc;
             error += dy;
         }
     }
