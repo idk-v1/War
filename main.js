@@ -15,6 +15,9 @@ var activeMap = -1;
 var moves;
 var enemys;
 
+var teamAlive = false;
+var teamDowned = false;
+
 class Character
 {
     constructor(posx, posy, team, type)
@@ -23,9 +26,6 @@ class Character
         this.y = posy;
         this.team = team;
         this.type = type;
-        this.moveDist = 0;
-        this.health = 0;
-        this.acc = 0;
 
         switch (type)
         {
@@ -45,6 +45,8 @@ class Character
             this.acc = 0.25;
             break;
         }
+
+        this.sHealth = this.health;
     }
 }
 
@@ -72,6 +74,7 @@ function start(map)
     select = -1;
     document.querySelector("body").style.backgroundColor = "#f88";
     clearArr();
+    ctx.font = can.width / ctx.measureText("MISS!").width * 3 + "px 'Sans-serif'";
 }
 
 function input(posx, posy)
@@ -99,7 +102,7 @@ function move(posx, posy)
     if (select == -1)
     {
         for (var i = 0; i < characters.length; i++)
-            if (characters[i].x == x && characters[i].y == y && characters[i].team == turns % 2 && characters[i].health > 1)
+            if (characters[i].x == x && characters[i].y == y && characters[i].team == Math.floor((turns % 4) / 2) && characters[i].health > 1)
             {
                 select = i;
                 clearArr();
@@ -110,22 +113,36 @@ function move(posx, posy)
                         if (raytrace(characters[select].x + 0.5, characters[select].y + 0.5, characters[i].x + 0.5, characters[i].y + 0.5))
                             enemys.push(i);
                 for (var c = 0; c < characters.length; c++)
-                    moves[characters[c].y][characters[c].x] = 0;
+                    if (characters[c].health > 0)
+                        moves[characters[c].y][characters[c].x] = 0;
             }
     }
     else
     {
         var ok = true;
         var shoot = -1;
+        var heal = -1;
+        var melee = -1;
 
         // CHARACTERS (NO)
         for (var i = 0; i < characters.length; i++)
-            if (characters[i].x == x && characters[i].y == y)
+            if (characters[i].x == x && characters[i].y == y && characters[i].health > 0)
+            {
+                // HEAL TEAM
+                if (characters[i].health == 1 && characters[i].team == characters[select].team)
+                    if (Math.abs(characters[i].x - characters[select].x) <= 1 && Math.abs(characters[i].y - characters[select].y) <= 1)
+                        heal = i;
+
+                // MELEE ENEMY
+                if (characters[i].team != characters[select].team)
+                    if (Math.abs(characters[i].x - characters[select].x) <= 1 && Math.abs(characters[i].y - characters[select].y) <= 1)
+                        melee = i;
                 ok = false;
+            }
         
         // SHOOT
         for (var i = 0; i < enemys.length; i++)
-            if (x == characters[enemys[i]].x && y == characters[enemys[i]].y && characters[enemys[i]].health > 1)
+            if (x == characters[enemys[i]].x && y == characters[enemys[i]].y && characters[enemys[i]].health > 1 && melee == -1)
                 shoot = i;
 
         // WALL (NO)
@@ -142,12 +159,9 @@ function move(posx, posy)
         // MOVE SELECTED
         if (ok && moves[y][x])
         {
-            clearArr();
             characters[select].x = x;
             characters[select].y = y;
-            select = -1;
-            turns++;
-            document.querySelector("body").style.backgroundColor = "#" + (turns % 2 ? "88f" : "f88");
+            endTurn();
         }
 
         // SHOOT ENEMY
@@ -155,10 +169,24 @@ function move(posx, posy)
         {
             if (Math.random() >= characters[select].acc)
                 characters[enemys[shoot]].health--;
-            clearArr();
-            select = -1;
-            turns++;
-            document.querySelector("body").style.backgroundColor = "#" + (turns % 2 ? "88f" : "f88");
+            else
+            {
+                ctx.fillStyle = "#fff";
+                ctx.fillText("MISS!", can.width * 0.33 - can.width / ctx.measureText("|MISS!|").width, can.height * 0.54);
+            }
+            endTurn();
+        }
+
+        if (heal != -1)
+        {
+            characters[heal].health++;
+            endTurn();
+        }
+
+        if (melee != -1)
+        {
+            characters[melee].health--;
+            endTurn();
         }
     }
 }
@@ -167,6 +195,17 @@ function render()
 {
     if (activeMap != -1)
     {
+        teamDowned = false;
+        for (var i = 0; i < characters.length; i++)
+            if (characters[i].team == Math.floor((turns % 4) / 2) && characters[i].health > 1)
+                teamDowned = true;
+        if (!teamDowned)
+        {
+            clearArr();
+        select = -1;
+        turns++;
+        }
+
         // DRAW TILES
         for (var y = 0; y < tileNum; y++)
             for (var x = 0; x < tileNum; x++)
@@ -194,15 +233,17 @@ function render()
             for (var i = 0; i < enemys.length; i++)
             {
                 if (characters[enemys[i]].health > 1)
-                ctx.strokeStyle = "#ff8";
-                ctx.lineWidth = tileSize / 10;
-                ctx.beginPath();
-                ctx.moveTo((characters[select].x + 0.5) * tileSize, (characters[select].y + 0.5) * tileSize);
-                ctx.lineTo((characters[enemys[i]].x + 0.5) * tileSize, (characters[enemys[i]].y + 0.5) * tileSize);
-                ctx.stroke();
+                {
+                    ctx.strokeStyle = "#ff8";
+                    ctx.lineWidth = tileSize / 10;
+                    ctx.beginPath();
+                    ctx.moveTo((characters[select].x + 0.5) * tileSize, (characters[select].y + 0.5) * tileSize);
+                    ctx.lineTo((characters[enemys[i]].x + 0.5) * tileSize, (characters[enemys[i]].y + 0.5) * tileSize);
+                    ctx.stroke();
 
-                ctx.fillStyle = "#ff82";
-                ctx.fillRect(characters[enemys[i]].x * tileSize, characters[enemys[i]].y * tileSize, tileSize, tileSize);
+                    ctx.fillStyle = "#ff82";
+                    ctx.fillRect(characters[enemys[i]].x * tileSize, characters[enemys[i]].y * tileSize, tileSize, tileSize);
+                }
             }
 
             // DRAW POSSIBLE MOVES
@@ -218,18 +259,47 @@ function render()
         for (var i = 0; i < characters.length; i++)
         {
             // DRAW TEAM OUTLINE
-            if (characters[i].team == turns % 2 && characters[i].health > 0)
+            if (characters[i].team == Math.floor((turns % 4) / 2) && characters[i].health > 0)
             {
-                ctx.fillStyle = "#fff4";
-                ctx.fillRect(characters[i].x * tileSize, characters[i].y * tileSize, tileSize, tileSize);
+                if (characters[i].health != 1)
+                {
+                    ctx.fillStyle = "#fff4";
+                    ctx.fillRect(characters[i].x * tileSize, characters[i].y * tileSize, tileSize, tileSize);
+                }
             }
 
             // DRAW CHARACTERS
             if (characters[i].health > 0)
             {
                 ctx.fillStyle = "#" + (characters[i].team ? "00f" : "f00");
-                ctx.fillRect(characters[i].x * tileSize + tileSize * 0.1, characters[i].y * tileSize + tileSize *  0.1, tileSize * 0.8, tileSize * 0.8);
+                ctx.fillRect(characters[i].x * tileSize + tileSize * 0.1, characters[i].y * tileSize + tileSize * 0.1, tileSize * 0.8, tileSize * 0.8);
+
+                // DOWNED CHARACTERS
+                if (characters[i].health == 1)
+                {
+                ctx.fillStyle = "#2224";
+                ctx.fillRect(characters[i].x * tileSize + tileSize * 0.1, characters[i].y * tileSize + tileSize * 0.1, tileSize * 0.8, tileSize * 0.8);
+                }
+
+                // HEALTH BAR
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(characters[i].x * tileSize, characters[i].y * tileSize, tileSize, tileSize / 6);
+                if (characters[i].health == 1)
+                    ctx.fillStyle = "#ff0";
+                else
+                    ctx.fillStyle = "#0f0";
+                ctx.fillRect(characters[i].x * tileSize + tileSize / 24, characters[i].y * tileSize + tileSize / 24, (tileSize - tileSize / 12) * (characters[i].health / characters[i].sHealth), tileSize / 12);
             }
+        }
+
+        teamAlive = false;
+        for (var i = 0; i < characters.length; i++)
+            if (characters[i].team != Math.floor((turns % 4) / 2) && characters[i].health > 0)
+                teamAlive = true;
+        if (!teamAlive)
+        {
+            ctx.fillStyle = "#fff";
+            ctx.fillText("GAME OVER!", can.width * 0.18 - can.width / ctx.measureText("||GAME OVER!||").width, can.height * 0.54);        
         }
     }
     else
@@ -378,4 +448,12 @@ function clearArr()
     
     for (var i = 0; i < tileNum; i++)
         moves.push(temp.slice());
+}
+
+function endTurn()
+{
+    clearArr();
+    select = -1;
+    turns++;
+    document.querySelector("body").style.backgroundColor = "#" + (Math.floor((turns % 4) / 2) ? "88f" : "f88");
 }
