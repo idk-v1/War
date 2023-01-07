@@ -12,6 +12,9 @@ var turns = 0;
 var select = -1;
 var activeMap = -1;
 
+var moves;
+var enemys;
+
 class Character
 {
     constructor(posx, posy, team, type)
@@ -20,7 +23,8 @@ class Character
         this.y = posy;
         this.team = team;
         this.type = type;
-        this.dead = false;
+        this.moveDist = 0;
+        this.health = 0;
 
         switch (type)
         {
@@ -63,6 +67,7 @@ function start(map)
     turns = 0;
     select = -1;
     document.querySelector("body").style.backgroundColor = "#f88";
+    clearArr();
 }
 
 function input(posx, posy)
@@ -90,23 +95,62 @@ function move(posx, posy)
     if (select == -1)
     {
         for (var i = 0; i < characters.length; i++)
-            if (characters[i].x == x && characters[i].y == y && characters[i].team == turns % 2)
+            if (characters[i].x == x && characters[i].y == y && characters[i].team == turns % 2 && characters[i].health > 1)
+            {
                 select = i;
+                clearArr();
+                getMoves(characters[select].x, characters[select].y, characters[select].moveDist);
+                enemys = [];
+                for (var i = 0; i < characters.length; i++)
+                    if (characters[i].team != characters[select].team)
+                        if (raytrace(characters[select].x + 0.5, characters[select].y + 0.5, characters[i].x + 0.5, characters[i].y + 0.5))
+                            enemys.push(i);
+                for (var c = 0; c < characters.length; c++)
+                    moves[characters[c].y][characters[c].x] = 0;
+            }
     }
     else
     {
         var ok = true;
+        var shoot = -1;
+
+        // CHARACTERS (NO)
         for (var i = 0; i < characters.length; i++)
             if (characters[i].x == x && characters[i].y == y)
                 ok = false;
+        
+        // SHOOT
+        for (var i = 0; i < enemys.length; i++)
+            if (x == characters[enemys[i]].x && y == characters[enemys[i]].y && characters[enemys[i]].health > 1)
+                shoot = i;
+
+        // WALL (NO)
         if (maps[activeMap][y + 1][x])
             ok = false;
+
+        // SELF (CANCEL)
         if (characters[select].x == x && characters[select].y == y)
-            select = -1;
-        if (ok)
         {
+            clearArr();
+            select = -1;
+        }
+
+        // MOVE SELECTED
+        if (ok && moves[y][x])
+        {
+            clearArr();
             characters[select].x = x;
             characters[select].y = y;
+            select = -1;
+            turns++;
+            document.querySelector("body").style.backgroundColor = "#" + (turns % 2 ? "88f" : "f88");
+        }
+
+        // SHOOT ENEMY
+        if (shoot != -1)
+        {
+            characters[enemys[shoot]].health--;
+            clearArr();
             select = -1;
             turns++;
             document.querySelector("body").style.backgroundColor = "#" + (turns % 2 ? "88f" : "f88");
@@ -142,25 +186,45 @@ function render()
             ctx.fillRect(characters[select].x * tileSize, characters[select].y * tileSize, tileSize, tileSize);
 
             // DRAW RAYS
-            for (var i = 0; i < characters.length; i++)
-                if (characters[i].team != characters[select].team)
-                {
-                    raytrace(characters[select].x + 0.5, characters[select].y + 0.5, characters[i].x + 0.5, characters[i].y + 0.5);
-                }
+            for (var i = 0; i < enemys.length; i++)
+            {
+                if (characters[enemys[i]].health > 1)
+                ctx.strokeStyle = "#ff8";
+                ctx.lineWidth = tileSize / 10;
+                ctx.beginPath();
+                ctx.moveTo((characters[select].x + 0.5) * tileSize, (characters[select].y + 0.5) * tileSize);
+                ctx.lineTo((characters[enemys[i]].x + 0.5) * tileSize, (characters[enemys[i]].y + 0.5) * tileSize);
+                ctx.stroke();
+
+                ctx.fillStyle = "#ff82";
+                ctx.fillRect(characters[enemys[i]].x * tileSize, characters[enemys[i]].y * tileSize, tileSize, tileSize);
+            }
+
+            // DRAW POSSIBLE MOVES
+            for (var y = 0; y < tileNum; y++)
+                for (var x = 0; x < tileNum; x++)
+                    if (moves[y][x])
+                    {
+                        ctx.fillStyle = "#ff82";
+                        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                    }
         }
 
         for (var i = 0; i < characters.length; i++)
         {
             // DRAW TEAM OUTLINE
-            if (characters[i].team == turns % 2)
+            if (characters[i].team == turns % 2 && characters[i].health > 0)
             {
                 ctx.fillStyle = "#fff4";
                 ctx.fillRect(characters[i].x * tileSize, characters[i].y * tileSize, tileSize, tileSize);
             }
 
             // DRAW CHARACTERS
-            ctx.fillStyle = "#" + (characters[i].team ? "00f" : "f00");
-            ctx.fillRect(characters[i].x * tileSize + tileSize * 0.1, characters[i].y * tileSize + tileSize *  0.1, tileSize * 0.8, tileSize * 0.8);
+            if (characters[i].health > 0)
+            {
+                ctx.fillStyle = "#" + (characters[i].team ? "00f" : "f00");
+                ctx.fillRect(characters[i].x * tileSize + tileSize * 0.1, characters[i].y * tileSize + tileSize *  0.1, tileSize * 0.8, tileSize * 0.8);
+            }
         }
     }
     else
@@ -272,13 +336,41 @@ function raytrace(x0, y0, x1, y1)
         }
     }
 
-    if (ok)
+    return ok;
+}
+
+function getMoves(x, y, dist)
+{
+    if (dist >= 0)
     {
-        ctx.strokeStyle = "#ff8";
-        ctx.lineWidth = tileSize / 10;
-        ctx.beginPath();
-        ctx.moveTo(x0 * tileSize, y0 * tileSize);
-        ctx.lineTo(x1 * tileSize, y1 * tileSize);
-        ctx.stroke();
+        moves[y][x] = 1;
+
+        if (x > -1 && x < tileNum && y - 1 > -1 && y - 1 < tileNum)
+            if (!maps[activeMap][y - 1 + 1][x + 0])
+                getMoves(x + 0, y - 1, dist - 1);
+
+        if (x + 1 > -1 && x + 1 < tileNum && y > -1 && y < tileNum)
+            if (!maps[activeMap][y + 0 + 1][x + 1])
+                getMoves(x + 1, y + 0, dist - 1);
+
+        if (x > -1 && x < tileNum && y + 1 > -1 && y + 1 < tileNum)
+            if (!maps[activeMap][y + 1 + 1][x + 0])
+                getMoves(x + 0, y + 1, dist - 1);
+
+        if (x - 1 > -1 && x - 1 < tileNum && y > -1 && y < tileNum)
+            if (!maps[activeMap][y + 0 + 1][x - 1])
+                getMoves(x - 1, y + 0, dist - 1);
     }
+}
+
+function clearArr()
+{
+    var temp = [];
+    for (var i =  0; i < tileNum; i++)
+        temp.push(0);
+
+    moves = [];
+    
+    for (var i = 0; i < tileNum; i++)
+        moves.push(temp.slice());
 }
