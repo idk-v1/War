@@ -25,20 +25,24 @@ class Character
         this.type = type;
         this.moveDist = 0;
         this.health = 0;
+        this.acc = 0;
 
         switch (type)
         {
         case 0:
             this.moveDist = 4;
             this.health = 2;
+            this.acc = 0.5;
             break;
         case 1:
             this.moveDist = 3;
             this.health = 2;
+            this.acc = 0.75
             break;
         case 2:
             this.moveDist = 3;
             this.health = 3;
+            this.acc = 0.25;
             break;
         }
     }
@@ -149,7 +153,8 @@ function move(posx, posy)
         // SHOOT ENEMY
         if (shoot != -1)
         {
-            characters[enemys[shoot]].health--;
+            if (Math.random() >= characters[select].acc)
+                characters[enemys[shoot]].health--;
             clearArr();
             select = -1;
             turns++;
