@@ -34,16 +34,19 @@ class Character
             this.moveDist = 4;
             this.health = 2;
             this.acc = 0.5;
+            this.healTime = 0.5;
             break;
         case 1:
             this.moveDist = 3;
             this.health = 2;
             this.acc = 0.75
+            this.healTime = 0.5;
             break;
         case 2:
             this.moveDist = 3;
             this.health = 3;
             this.acc = 0.25;
+            this.healTime = 0.5;
             break;
         }
 
@@ -103,7 +106,7 @@ function move(posx, posy)
     if (select == -1)
     {
         for (var i = 0; i < characters.length; i++)
-            if (characters[i].x == x && characters[i].y == y && characters[i].team == Math.floor((turns % 4) / 2) && characters[i].health > 1)
+            if (characters[i].x == x && characters[i].y == y && characters[i].team == Math.floor((turns % 4) / 2) && characters[i].health >= 2)
             {
                 select = i;
                 clearArr();
@@ -130,7 +133,7 @@ function move(posx, posy)
             if (characters[i].x == x && characters[i].y == y && characters[i].health > 0)
             {
                 // HEAL TEAM
-                if (characters[i].health == 1 && characters[i].team == characters[select].team)
+                if (characters[i].health < 2 && characters[i].team == characters[select].team)
                     if (Math.abs(characters[i].x - characters[select].x) <= 1 && Math.abs(characters[i].y - characters[select].y) <= 1)
                         heal = i;
 
@@ -143,7 +146,7 @@ function move(posx, posy)
         
         // SHOOT
         for (var i = 0; i < enemys.length; i++)
-            if (x == characters[enemys[i]].x && y == characters[enemys[i]].y && characters[enemys[i]].health > 1 && melee == -1)
+            if (x == characters[enemys[i]].x && y == characters[enemys[i]].y)
                 shoot = i;
 
         // WALL (NO)
@@ -166,10 +169,10 @@ function move(posx, posy)
         }
 
         // SHOOT ENEMY
-        if (shoot != -1)
+        if (shoot != -1 && melee == -1 && characters[enemys[shoot]].health >= 2)
         {
             if (Math.random() >= characters[select].acc)
-                characters[enemys[shoot]].health--;
+                characters[enemys[shoot]].health = Math.floor(characters[enemys[shoot]].health - 1);
             else
             {
                 ctx.fillStyle = "#fff";
@@ -180,13 +183,15 @@ function move(posx, posy)
 
         if (heal != -1)
         {
-            characters[heal].health++;
+            characters[heal].health += characters[select].healTime;
+            if (characters[heal].health > 2)
+                characters[heal].health = 2;
             endTurn();
         }
 
-        if (melee != -1)
+        if (melee != -1 && shoot != -1)
         {
-            characters[melee].health--;
+            characters[melee].health = Math.floor(characters[melee].health - 1);
             endTurn();
         }
     }
@@ -198,7 +203,7 @@ function render()
     {
         teamUp = false;
         for (var i = 0; i < characters.length; i++)
-            if (characters[i].team == Math.floor((turns % 4) / 2) && characters[i].health > 1)
+            if (characters[i].team == Math.floor((turns % 4) / 2) && characters[i].health >= 2)
                 teamUp = true;
         if (!teamUp)
         {
@@ -276,7 +281,7 @@ function render()
                 ctx.fillRect(characters[i].x * tileSize + tileSize * 0.1, characters[i].y * tileSize + tileSize * 0.1, tileSize * 0.8, tileSize * 0.8);
 
                 // DOWNED CHARACTERS
-                if (characters[i].health == 1)
+                if (characters[i].health < 2)
                 {
                 ctx.fillStyle = "#2224";
                 ctx.fillRect(characters[i].x * tileSize + tileSize * 0.1, characters[i].y * tileSize + tileSize * 0.1, tileSize * 0.8, tileSize * 0.8);
@@ -285,7 +290,7 @@ function render()
                 // HEALTH BAR
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(characters[i].x * tileSize, characters[i].y * tileSize, tileSize, tileSize / 6);
-                if (characters[i].health == 1)
+                if (characters[i].health < 2)
                     ctx.fillStyle = "#ff0";
                 else
                     ctx.fillStyle = "#0f0";
@@ -343,6 +348,12 @@ function renderMenu(ticks)
     ctx.fillText(" PLAY ", can.width * 0.33 - can.width / ctx.measureText("|PLAY|").width, can.height * 0.54);
     ctx.strokeStyle = "#fff4";
     ctx.strokeRect(can.width / 2 - can.width / 4, can.height / 2 - can.height / 16, can.width / 2, can.height / 8);
+
+    ctx.save();
+    ctx.scale(0.25, 0.25);
+    ctx.fillStyle = "#fff";
+    ctx.fillText("v0.05", 0, can.height / 8);
+    ctx.restore();
 }
 
 function raytrace(x0, y0, x1, y1)
