@@ -7,7 +7,7 @@ html
 
 #can
 {
-    box-shadow: 0px 4px #11111144, 0px -4px #11111144, 4px 0px #11111144, -4px 0px #11111144;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4), 0 6px 20px 0 rgba(0, 0, 0, 0.38);
     position: fixed;
     top: 50%;
     left: 50%;

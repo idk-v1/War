@@ -16,7 +16,8 @@ var moves;
 var enemys;
 
 var teamAlive = false;
-var teamDowned = false;
+var teamUp = false;
+var colorCh = true;
 
 class Character
 {
@@ -146,7 +147,7 @@ function move(posx, posy)
                 shoot = i;
 
         // WALL (NO)
-        if (maps[activeMap][y + 1][x])
+        if (maps[activeMap][y + 1][x] % 2)
             ok = false;
 
         // SELF (CANCEL)
@@ -195,15 +196,15 @@ function render()
 {
     if (activeMap != -1)
     {
-        teamDowned = false;
+        teamUp = false;
         for (var i = 0; i < characters.length; i++)
             if (characters[i].team == Math.floor((turns % 4) / 2) && characters[i].health > 1)
-                teamDowned = true;
-        if (!teamDowned)
+                teamUp = true;
+        if (!teamUp)
         {
-            clearArr();
-        select = -1;
-        turns++;
+            turns += 2;
+            endTurn();
+            colorCh = false;
         }
 
         // DRAW TILES
@@ -211,7 +212,7 @@ function render()
             for (var x = 0; x < tileNum; x++)
             {
                 // DRAW WALLS
-                if (maps[activeMap][y + 1][x])
+                if (maps[activeMap][y + 1][x] % 2)
                 {
                     ctx.fillStyle = "#2224";
                     ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
@@ -396,7 +397,7 @@ function raytrace(x0, y0, x1, y1)
 
     for (; n > 0; --n)
     {
-        if (maps[activeMap][y + 1][x])
+        if (maps[activeMap][y + 1][x] % 2)
             ok = false;
 
         if (error > 0)
@@ -421,19 +422,19 @@ function getMoves(x, y, dist)
         moves[y][x] = 1;
 
         if (x > -1 && x < tileNum && y - 1 > -1 && y - 1 < tileNum)
-            if (!maps[activeMap][y - 1 + 1][x + 0])
+            if (!(maps[activeMap][y - 1 + 1][x + 0] % 2))
                 getMoves(x + 0, y - 1, dist - 1);
 
         if (x + 1 > -1 && x + 1 < tileNum && y > -1 && y < tileNum)
-            if (!maps[activeMap][y + 0 + 1][x + 1])
+            if (!(maps[activeMap][y + 0 + 1][x + 1] % 2))
                 getMoves(x + 1, y + 0, dist - 1);
 
         if (x > -1 && x < tileNum && y + 1 > -1 && y + 1 < tileNum)
-            if (!maps[activeMap][y + 1 + 1][x + 0])
+            if (!(maps[activeMap][y + 1 + 1][x + 0] % 2))
                 getMoves(x + 0, y + 1, dist - 1);
 
         if (x - 1 > -1 && x - 1 < tileNum && y > -1 && y < tileNum)
-            if (!maps[activeMap][y + 0 + 1][x - 1])
+            if (!(maps[activeMap][y + 0 + 1][x - 1] % 2))
                 getMoves(x - 1, y + 0, dist - 1);
     }
 }
@@ -453,7 +454,10 @@ function clearArr()
 function endTurn()
 {
     clearArr();
-    select = -1;
     turns++;
-    document.querySelector("body").style.backgroundColor = "#" + (Math.floor((turns % 4) / 2) ? "88f" : "f88");
+    select = -1;
+    if (colorCh)
+    {
+        document.querySelector("body").style.backgroundColor = "#" + (Math.floor((turns % 4) / 2) ? "88f" : "f88");
+    }
 }
