@@ -19,6 +19,8 @@ var teamAlive = false;
 var teamUp = false;
 var colorCh = true;
 
+document.title = "War | v0.05";
+
 class Character
 {
     constructor(posx, posy, team, type)
@@ -238,7 +240,7 @@ function render()
             // DRAW RAYS
             for (var i = 0; i < enemys.length; i++)
             {
-                if (characters[enemys[i]].health > 1)
+                if (characters[enemys[i]].health >= 2)
                 {
                     ctx.strokeStyle = "#ff8";
                     ctx.lineWidth = tileSize / 10;
@@ -267,7 +269,7 @@ function render()
             // DRAW TEAM OUTLINE
             if (characters[i].team == Math.floor((turns % 4) / 2) && characters[i].health > 0)
             {
-                if (characters[i].health != 1)
+                if (characters[i].health >= 2)
                 {
                     ctx.fillStyle = "#fff4";
                     ctx.fillRect(characters[i].x * tileSize, characters[i].y * tileSize, tileSize, tileSize);
@@ -291,7 +293,7 @@ function render()
                 ctx.fillStyle = "#fff";
                 ctx.fillRect(characters[i].x * tileSize, characters[i].y * tileSize, tileSize, tileSize / 6);
                 if (characters[i].health < 2)
-                    ctx.fillStyle = "#ff0";
+                    ctx.fillStyle = "#f80";
                 else
                     ctx.fillStyle = "#0f0";
                 ctx.fillRect(characters[i].x * tileSize + tileSize / 24, characters[i].y * tileSize + tileSize / 24, (tileSize - tileSize / 12) * (characters[i].health / characters[i].sHealth), tileSize / 12);
