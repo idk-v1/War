@@ -19,7 +19,7 @@ var teamAlive = false;
 var teamUp = false;
 var colorCh = true;
 
-document.title = "War | v0.05";
+document.title = "War | v0.06";
 
 class Character
 {
