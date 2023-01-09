@@ -354,7 +354,7 @@ function renderMenu(ticks)
     ctx.save();
     ctx.scale(0.25, 0.25);
     ctx.fillStyle = "#fff";
-    ctx.fillText("v0.05", 0, can.height / 8);
+    ctx.fillText("v0.06", 0, can.height / 8);
     ctx.restore();
 }
 
