@@ -19,7 +19,9 @@ var teamAlive = false;
 var teamUp = false;
 var colorCh = true;
 
-document.title = "War | v0.06";
+var version = 0.07;
+
+document.title = "War | v" + version;
 
 class Character
 {
@@ -58,12 +60,14 @@ class Character
 
 var characters = 
 [
-    new Character( 0,  0, 0, 0),
-    new Character( 1,  0, 0, 1),
-    new Character( 2,  0, 0, 2),
-    new Character( 0, 14, 1, 0),
-    new Character( 1, 14, 1, 1),
-    new Character( 2, 14, 1, 2),
+    new Character( 2,  0, 0, 0),
+    new Character( 5,  0, 0, 1),
+    new Character( 9,  0, 0, 2),
+    new Character(12,  0, 0, 0),
+    new Character( 2, 14, 1, 0),
+    new Character( 5, 14, 1, 1),
+    new Character( 9, 14, 1, 2),
+    new Character(12, 14, 1, 1),
 ];
 
 ctx.font = can.width / ctx.measureText("PLAY").width * 3 + "px 'Sans-serif'";
@@ -129,15 +133,24 @@ function move(posx, posy)
         var shoot = -1;
         var heal = -1;
         var melee = -1;
+        var reselect = -1;
 
         // CHARACTERS (NO)
         for (var i = 0; i < characters.length; i++)
             if (characters[i].x == x && characters[i].y == y && characters[i].health > 0)
             {
                 // HEAL TEAM
-                if (characters[i].health < 2 && characters[i].team == characters[select].team)
-                    if (Math.abs(characters[i].x - characters[select].x) <= 1 && Math.abs(characters[i].y - characters[select].y) <= 1)
-                        heal = i;
+                if (characters[i].team == characters[select].team)
+                {
+                    if (characters[i].health < 2)
+                    {
+                        if (Math.abs(characters[i].x - characters[select].x) <= 1 && Math.abs(characters[i].y - characters[select].y) <= 1)
+                            heal = i;
+                    }
+                    else if (characters[i].health >= 2)
+                        if (i != select)
+                            reselect = i;
+                }
 
                 // MELEE ENEMY
                 if (characters[i].team != characters[select].team)
@@ -195,6 +208,21 @@ function move(posx, posy)
         {
             characters[melee].health = Math.floor(characters[melee].health - 1);
             endTurn();
+        }
+
+        if (reselect != -1)
+        {
+            select = reselect;
+            clearArr();
+            getMoves(characters[select].x, characters[select].y, characters[select].moveDist);
+            enemys = [];
+            for (var i = 0; i < characters.length; i++)
+                if (characters[i].team != characters[select].team)
+                    if (raytrace(characters[select].x + 0.5, characters[select].y + 0.5, characters[i].x + 0.5, characters[i].y + 0.5))
+                        enemys.push(i);
+            for (var c = 0; c < characters.length; c++)
+                if (characters[c].health > 0)
+                    moves[characters[c].y][characters[c].x] = 0;
         }
     }
 }
@@ -354,7 +382,7 @@ function renderMenu(ticks)
     ctx.save();
     ctx.scale(0.25, 0.25);
     ctx.fillStyle = "#fff";
-    ctx.fillText("v0.06", 0, can.height / 8);
+    ctx.fillText("v" + version, 0, can.height / 8);
     ctx.restore();
 }
 
