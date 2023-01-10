@@ -120,8 +120,16 @@ function move(posx, posy)
                 enemys = [];
                 for (var i = 0; i < characters.length; i++)
                     if (characters[i].team != characters[select].team)
-                        if (raytrace(characters[select].x + 0.5, characters[select].y + 0.5, characters[i].x + 0.5, characters[i].y + 0.5))
-                            enemys.push(i);
+                        if (characters[select].team)
+                        {
+                            if (raytrace(characters[select].x + 0.5, characters[select].y + 0.5, characters[i].x + 0.5, characters[i].y + 0.5))
+                                enemys.push(i);
+                        }
+                        else
+                        {
+                            if (raytrace(characters[i].x + 0.5, characters[i].y + 0.5, characters[select].x + 0.5, characters[select].y + 0.5))
+                                enemys.push(i);
+                        }
                 for (var c = 0; c < characters.length; c++)
                     if (characters[c].health > 0)
                         moves[characters[c].y][characters[c].x] = 0;
@@ -218,8 +226,16 @@ function move(posx, posy)
             enemys = [];
             for (var i = 0; i < characters.length; i++)
                 if (characters[i].team != characters[select].team)
-                    if (raytrace(characters[select].x + 0.5, characters[select].y + 0.5, characters[i].x + 0.5, characters[i].y + 0.5))
-                        enemys.push(i);
+                    if (characters[select].team)
+                    {
+                        if (raytrace(characters[select].x + 0.5, characters[select].y + 0.5, characters[i].x + 0.5, characters[i].y + 0.5))
+                            enemys.push(i);
+                    }
+                    else
+                    {
+                        if (raytrace(characters[i].x + 0.5, characters[i].y + 0.5, characters[select].x + 0.5, characters[select].y + 0.5))
+                            enemys.push(i);
+                    }
             for (var c = 0; c < characters.length; c++)
                 if (characters[c].health > 0)
                     moves[characters[c].y][characters[c].x] = 0;
