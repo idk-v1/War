@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <link href="style.css" rel="stylesheet">
-<canvas id="can" onclick="input(window.event.clientX, window.event.clientY)"></canvas>
-<script src="res/map.js"></script>
+<canvas id="can" onclick="input(window.event.clientX - this.getBoundingClientRect().x, window.event.clientY - this.getBoundingClientRect().y)"></canvas>
+<script src="maps.js"></script>
+<srcipt src="char.js"></srcipt>
+<script src="game.js"></script>
+<script src="element.js"></script>
 <script src="main.js"></script>
