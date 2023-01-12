@@ -1,15 +1,17 @@
 var can = document.getElementById("can");
-ctx = can.getContext("2d");
+var ctx = can.getContext("2d");
 
 can.width = Math.min(window.innerWidth * 0.95, window.innerHeight * 0.95);
 can.height = can.width;
 
 var game;
-
+var map = -1;
+var bluech = [];
+var redch = [];
 var page = 0;
-var buttons = [
-    new Button(can.width * 0.5 - can.width * 0.5 * 0.4, can.height * 0.5 - can.height * 0.5 * 0.125, can.width * 0.4, can.height * 0.125, 1, "START")
-];
+
+var version = 0.08;
+document.title = "War | v" + version;
 
 renderBG();
 renderPage();
@@ -38,6 +40,25 @@ function input(x, y)
                     renderBG();
                     renderPage();
                 }
+                else if(page == 2)   
+                {
+                    if(i < 9 && i > -1)
+                    {
+                        if (pages[page].select != i)
+                            pages[page].select = i;
+                        else
+                            pages[page].select = -1;
+                        renderBG();
+                        renderPage();
+                    }
+                    else if(i < 17 && i > 8)
+                    {
+                        pages[page].dsp[i].index = pages[page].select;
+                        pages[page].select = -1;
+                        renderBG();
+                        renderPage();
+                    }
+                }
             }
         }
 
@@ -49,17 +70,37 @@ function input(x, y)
               x <= can.width / 2 + can.width * btn.x + can.width * btn.w &
                y <= can.height / 2 + can.height * btn.y + can.height * btn.h)
             {
-                if (page > -1 && page < 2 && i == 0)
+                if (page == 0 && i == 0)
                 {
-                    page++;
+                    page = 1;
+                    renderBG();
+                    renderPage();
+                }
+                else if (page == 1 && i == 0 && pages[page].select != -1)
+                {
+                    map = pages[page].dsp[pages[page].select].index;
+                    page = 2;
                     renderBG();
                     renderPage();
                 }
                 else if (page == 2 && i == 0)
                 {
-                    page++;
-                    ctx.clearRect(0, 0, can.width, can.height);
-                    game = new Game(/* chars, mapNum */);
+                    var all = true;
+                    for (var d = 9; d < 17; d++)
+                        if(pages[page].dsp[d].index == -1)
+                            all = false;
+
+                    if(all)
+                    {
+                        for (var d = 0; d < 4; d++)
+                        {
+                            redch.push(pages[page].dsp[8 + d].index);
+                            bluech.push(pages[page].dsp[12 + d].index);
+                        }
+                        page++;
+                        ctx.clearRect(0, 0, can.width, can.height);
+                        game = new Game(bluech.concat(redch), maps[map]);
+                    }
                 }
             }
         }
@@ -106,18 +147,38 @@ function renderPage()
 
         ctx.fillStyle = "#fff";
         ctx.fillRect(can.width / 2 + can.width * dsp.x, can.height / 2 + can.height * dsp.y, can.width * dsp.w, can.height * dsp.h);
-        for (var y = 0; y < maps[dsp.index][0]; y++)
-            for (var x = 0; x < maps[dsp.index][0]; x++)
-            {
-                if (maps[dsp.index][y + 1][x] % 2)
-                {
-                    ctx.fillStyle = "#2228";
-                    ctx.fillRect(can.width / 2 + can.width * dsp.x + can.width * dsp.w * (x / maps[dsp.index][0]), can.height / 2 + can.height * dsp.y + can.height * dsp.h * (y / maps[dsp.index][0]), (can.width * dsp.w) / maps[dsp.index][0], (can.height * dsp.h) / maps[dsp.index][0]);
-                }
 
-                ctx.fillStyle = "#" + ((x + y * maps[dsp.index][0]) % 2 ? "8886" : "90909088");
-                ctx.fillRect(can.width / 2 + can.width * dsp.x + can.width * dsp.w * (x / maps[dsp.index][0]), can.height / 2 + can.height * dsp.y + can.height * dsp.h * (y / maps[dsp.index][0]), (can.width * dsp.w) / maps[dsp.index][0], (can.height * dsp.h) / maps[dsp.index][0]);
+        if (page == 1)
+        {
+            for (var t = 0; t < 2; t++)
+                for (var y = 0; y < maps[dsp.index][0]; y++)
+                    for (var x = 0; x < maps[dsp.index][0]; x++)
+                    {
+                        if (maps[dsp.index][y + 1][x] % 2)
+                        {
+                            ctx.fillStyle = "#2228";
+                            ctx.fillRect(can.width / 2 + can.width * dsp.x + can.width * dsp.w * (x / maps[dsp.index][0]), can.height / 2 + can.height * dsp.y + can.height * dsp.h * (y / maps[dsp.index][0]), (can.width * dsp.w) / maps[dsp.index][0], (can.height * dsp.h) / maps[dsp.index][0]);
+                        }
+
+                        ctx.fillStyle = "#" + ((x + y * maps[dsp.index][0]) % 2 ? "8886" : "90909088");
+                        ctx.fillRect(can.width / 2 + can.width * dsp.x + can.width * dsp.w * (x / maps[dsp.index][0]), can.height / 2 + can.height * dsp.y + can.height * dsp.h * (y / maps[dsp.index][0]), (can.width * dsp.w) / maps[dsp.index][0], (can.height * dsp.h) / maps[dsp.index][0]);
+                    }
+        }
+
+        else if (page == 2)
+        {
+            if (dsp.index != -1)
+            {
+                ctx.fillStyle = "hsl(0, 0%, " + (100 - dsp.index * 11) + "%)";
+                ctx.fillRect(can.width / 2 + can.width * dsp.x, can.height / 2 + can.height * dsp.y, can.width * dsp.w, can.height * dsp.h);
             }
+            else
+            {
+                ctx.fillStyle =  "#" + (i > 8 && i < 13 ? "f00" : "00f");
+                ctx.fillRect(can.width / 2 + can.width * dsp.x, can.height / 2 + can.height * dsp.y, can.width * dsp.w, can.height * dsp.h);
+            }
+        }
+
         ctx.strokeRect(can.width / 2 + can.width * dsp.x, can.height / 2 + can.height * dsp.y, can.width * dsp.w, can.height * dsp.h);
     }
 
