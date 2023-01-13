@@ -18,10 +18,10 @@ class Game
         this.tileSize = can.width / this.tileNum;
         this.clearArr();
 
-        for (var i = 0; i < 4; i++)
+        for (var i = 0; i < 8; i++)
         {
             var pos;
-            switch(i)
+            switch(i % 4)
             {
                 case 0:
                     pos = 2;
@@ -36,8 +36,36 @@ class Game
                     pos = 12;    
             }
 
-            this.chars.push(new Character(pos, 0, 0, characters[i]));
-            this.chars.push(new Character(pos, this.tileNum - 1, 1, characters[i + 4]));
+            switch (characters[i])
+            {
+                case 0:
+                    this.chars.push(new Grunt(pos, Math.floor(i / 4) * (this.tileNum - 1), Math.floor(i / 4)));
+                    break;
+                case 1:
+                    this.chars.push(new Leader(pos, Math.floor(i / 4) * (this.tileNum - 1), Math.floor(i / 4)));
+                    break;
+                case 2:
+                    this.chars.push(new Bomber(pos, Math.floor(i / 4) * (this.tileNum - 1), Math.floor(i / 4)));
+                    break;
+                case 3:
+                    this.chars.push(new Scout(pos, Math.floor(i / 4) * (this.tileNum - 1), Math.floor(i / 4)));
+                    break;
+                case 4:
+                    this.chars.push(new Brute(pos, Math.floor(i / 4) * (this.tileNum - 1), Math.floor(i / 4)));
+                    break;
+                case 5:
+                    this.chars.push(new Assassin(pos, Math.floor(i / 4) * (this.tileNum - 1), Math.floor(i / 4)));
+                    break;
+                case 6:
+                    this.chars.push(new Heavy(pos, Math.floor(i / 4) * (this.tileNum - 1), Math.floor(i / 4)));
+                    break;
+                case 7:
+                    this.chars.push(new Medic(pos, Math.floor(i / 4) * (this.tileNum - 1), Math.floor(i / 4)));
+                    break;
+                case 8:
+                    this.chars.push(new Sniper(pos, Math.floor(i / 4) * (this.tileNum - 1), Math.floor(i / 4)));
+                    break;
+            }
         }
 
         this.interval = window.setInterval(() => this.render(), 1000 / 60);
@@ -129,35 +157,8 @@ class Game
     getMoves(x, y, dist)
     {
         this.clearArr();
-        this.diamond(x, y, dist);
-        for (var i = 0; i < this.chars.length; i++)
-        {
-            this.moves[this.chars[i].y][this.chars[i].x] = 0;
-        }
-    }
-
-    diamond(x, y, dist)
-    {
-        if (dist >= 0)
-        {
-            this.moves[y][x] = 1;
-
-            if (x >= 0 && x < this.tileNum && y - 1 >= 0 && y - 1 < this.tileNum)
-                if (!this.map[y - 1][x] % 2)
-                    this.diamond(x, y - 1, dist - 1);
-
-            if (x + 1 >= 0 && x + 1 < this.tileNum && y >= 0 && y < this.tileNum)
-                if (!this.map[y][x + 1] % 2)
-                    this.diamond(x + 1, y, dist - 1);
-
-            if (x >= 0 && x < this.tileNum && y + 1 >= 0 && y + 1 < this.tileNum)
-                if (!this.map[y + 1][x] % 2)
-                    this.diamond(x, y + 1, dist - 1);
-
-            if (x - 1 >= 0 && x - 1 < this.tileNum && y >= 0 && y < this.tileNum)
-                if (!this.map[y][x - 1] % 2)
-                    this.diamond(x - 1, y, dist - 1);
-        }
+        this.enemies = [];
+        this.chars[this.select].getMoves(x, y, dist, this.chars, this.map, this.moves, this.tileNum);
     }
 
     clearArr()
