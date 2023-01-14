@@ -131,7 +131,7 @@ class Game
                 else if (this.chars[index].hp >= 2 && this.chars[index].team != this.chars[this.select].team)
                 {
                     for (var i = 0; i < this.enemies.length; i++)
-                        if (index == this.enemies[i])
+                        if (index == this.enemies[i] && this.chars[this.select].type != 2 && this.chars[this.select].type != 5 && this.chars[this.select].type != 6 && this.chars[this.select].type != 7)
                         {
                             this.chars[i].attack(this.enemies[i], this.chars);
                             this.enemies = [];
