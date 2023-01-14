@@ -128,7 +128,7 @@ class Character
 
     attack(enemy, chars)
     {
-        if (this.acc - Math.sqrt(Math.pow(chars[enemy].x - this.x, 2) + Math.pow(chars[enemy].y - this.y, 2)) * 0.01 >= Math.random())
+        if (this.acc - Math.sqrt(Math.pow(chars[enemy].x - this.x, 2) + Math.pow(chars[enemy].y - this.y, 2)) * 0.005 >= Math.random())
             chars[enemy].hp -= 1;
     }
 }
