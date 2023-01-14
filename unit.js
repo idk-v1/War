@@ -249,8 +249,8 @@ class Scout extends Character
 
 class Brute extends Character
 {
-    acc = 0.5;
-    macc = 0.75;
+    acc = 0.33;
+    macc = 0.66;
     hp = 3;
     mov = 2;
     ht = 0.5;
@@ -314,7 +314,7 @@ class Medic extends Character
 
 class Sniper extends Character
 {
-    acc = 0.66;
+    acc = 0.8;
     macc = 0.5;
     hp = 2;
     mov = 3;

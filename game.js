@@ -246,7 +246,7 @@ class Game
         this.chars[this.select].getMoves(x, y, dist, this.chars, this.map, this.moves, this.tileNum);
         for (var i = 0; i < this.chars.length; i++)
             if (this.chars[i].team != this.chars[this.select].team && this.chars[i].hp >= 2)
-                if (this.chars[this.select].raytrace(this.chars[this.select].x, this.chars[this.select].y, this.chars[i].x, this.chars[i].y, this.map))
+                if (this.chars[this.select].raytrace(this.chars[this.select].x + 0.5, this.chars[this.select].y + 0.5, this.chars[i].x + 0.5, this.chars[i].y + 0.5, this.map))
                     this.enemies.push(i);
     }
 

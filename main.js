@@ -10,7 +10,7 @@ var bluech = [];
 var redch = [];
 var page = 0;
 
-var version = 0.09;
+var version = 0.10;
 document.title = "War | v" + version;
 
 renderBG();
