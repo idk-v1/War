@@ -148,7 +148,7 @@ function renderPage()
                 name = "Leader";
                 break;
             case 2:
-                name = "Bomber";
+                name = "Bomber*";
                 break;
             case 3:
                 name = "Scout";
