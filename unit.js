@@ -267,7 +267,7 @@ class Brute extends Character
 class Assassin extends Character
 {
     acc = 0.5;
-    macc = 1;
+    macc = 2;
     hp = 2;
     mov = 5;
     ht = 0.5;
