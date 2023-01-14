@@ -94,8 +94,8 @@ function input(x, y)
                     {
                         for (var d = 0; d < 4; d++)
                         {
-                            redch.push(pages[page].dsp[8 + d].index);
-                            bluech.push(pages[page].dsp[12 + d].index);
+                            redch.push(pages[page].dsp[9 + d].index);
+                            bluech.push(pages[page].dsp[13 + d].index);
                         }
                         page++;
                         ctx.clearRect(0, 0, can.width, can.height);
