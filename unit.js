@@ -302,7 +302,7 @@ class Medic extends Character
     macc = 0.5;
     hp = 3;
     mov = 4;
-    ht = 0.5;
+    ht = 1;
     type = 7;
     hps = 3;
 
