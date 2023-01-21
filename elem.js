@@ -84,12 +84,12 @@ pages[1].lbl.push(new Label(-0.125 - 0.3, -0.1, 0.25, 0.05, "ORE", 0.04, true));
 //MID
 pages[1].clk.push(new ClickArea(-0.125, -0.36, 0.25, 0.31));
 pages[1].dsp.push(new Display(-0.125, -0.36, 0.25, 0.25, 1));
-pages[1].lbl.push(new Label(-0.125, -0.1, 0.25, 0.05, "LINE", 0.04, true));
+pages[1].lbl.push(new Label(-0.125, -0.1, 0.25, 0.05, "LINES", 0.04, true));
 
 //RIGHT
 pages[1].clk.push(new ClickArea(-0.125 + 0.3, -0.36, 0.25, 0.31));
 pages[1].dsp.push(new Display(-0.125 + 0.3, -0.36, 0.25, 0.25, 2));
-pages[1].lbl.push(new Label(-0.125 + 0.3, -0.1, 0.25, 0.05, "CLEAR", 0.04, true));
+pages[1].lbl.push(new Label(-0.125 + 0.3, -0.1, 0.25, 0.05, "SPIDER", 0.04, true));
 
 
 //CHARACTERS
