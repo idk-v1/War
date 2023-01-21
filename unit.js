@@ -135,8 +135,8 @@ class Character
 
 class Grunt extends Character
 {
-    acc = 0.33;
-    macc = 0.33;
+    acc = 0.5;
+    macc = 0.5;
     hp = 2;
     mov = 3;
     ht = 0.5;
@@ -217,7 +217,7 @@ class Bomber extends Character
 
 class Scout extends Character
 {
-    acc = 0.5;
+    acc = 0.66;
     macc = 0.5;
     hp = 2;
     mov = 3;
@@ -249,7 +249,7 @@ class Scout extends Character
 
 class Brute extends Character
 {
-    acc = 0.33;
+    acc = 0.5;
     macc = 0.66;
     hp = 3;
     mov = 2;
@@ -314,7 +314,7 @@ class Medic extends Character
 
 class Sniper extends Character
 {
-    acc = 0.8;
+    acc = 0.85;
     macc = 0.5;
     hp = 2;
     mov = 3;
