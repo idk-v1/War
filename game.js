@@ -238,7 +238,7 @@ class Game
             ctx.fillText("GAME OVER!", can.width / 2, can.height / 2);
         }
 
-        ctx.fillStyle = "#" + (Math.floor(this.turns / 2) % 2 ? "54433422" : "34435422");
+        ctx.fillStyle = "#" + (Math.floor(this.turns / 2) % 2 ? "54433444" : "34435444");
         ctx.fillRect(0, 0, can.width, can.height);
     }
 
